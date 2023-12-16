@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import compression from "compression";
 import { userRouter, bucketsRouter, filesRouter } from "./routes/index.js";
+import connect from "./database/database.js";
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api/buckets", bucketsRouter);
 app.use("/api/files", filesRouter);
 
 app.listen(port, async () => {
+	await connect();
 	console.log(`Listening on port: ${port}`);
 });
 

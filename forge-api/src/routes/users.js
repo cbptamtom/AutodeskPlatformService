@@ -6,7 +6,7 @@ const router = Router();
 // Define middleware functions for user management
 router.get("/", userController.getAllUsers);
 router.get("/:id", userController.getDetailUser);
-router.post("/login", body("email").isEmail(), body("passwork").isLength({ min: 5 }), userController.login);
+router.post("/login", body("email").isEmail(), body("password").isLength({ min: 5 }), userController.login);
 router.post("/register", userController.register);
 
 router.put("/:id", (req, res) => {

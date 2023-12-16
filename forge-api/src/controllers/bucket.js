@@ -10,8 +10,8 @@ const createBucket = (req, res) => {
 	return res.send("create new bucket");
 };
 
-const deleteBucketById = (req, res) => {
-	return res.send("delete bucket by Id");
-};
+// const deleteBucketById = (req, res) => {
+// 	return res.send("delete bucket by Id");
+// };
 
-export default { getBuckets, getBucketById, createBucket, deleteBucketById };
+export default { getBuckets, getBucketById, createBucket };
