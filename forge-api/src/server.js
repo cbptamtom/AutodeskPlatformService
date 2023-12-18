@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 import compression from "compression";
 import { userRouter, bucketsRouter, filesRouter } from "./routes/index.js";
 import connect from "./database/database.js";
-
+import checkToken from "./authentication/auth.js";
+//authentication middleware
 dotenv.config();
 const app = express();
+app.use(checkToken);
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 const port = process.env.PORT ?? 4000;

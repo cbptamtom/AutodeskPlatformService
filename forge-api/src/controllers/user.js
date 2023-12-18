@@ -1,4 +1,5 @@
 import HttpStatusCode from "./../helper/HTTPStatusCode.js";
+import { userRepository } from "../repositories/index.js";
 const getAllUsers = async (req, res) => {
 	res.json("AAA");
 };
@@ -10,11 +11,30 @@ const login = async (req, res) => {
 	if (!errors.isEmpty()) {
 		return res.status(HttpStatusCode.BAD_REQUEST).json({ errors: errors.array() });
 	}
-	res.status(HttpStatusCode.OK).json({ message: "Login user successfully", data: { email, password } });
+	try {
+		let existingUser = await userRepository.login({ email, password });
+		res.status(HttpStatusCode.OK).json({ message: "Login user successfully", data: existingUser });
+	} catch (exception) {
+		res.status(HttpStatusCode.INTERNAL_SEVER_ERROR).json({
+			message: exception.toString(),
+		});
+	}
 };
 
 const register = async (req, res) => {
-	res.status(HttpStatusCode.INSERT_OK).json({ message: "Register user successfully", data: "Detail user here..." });
+	const { name, email, password, phoneNumber, address } = req.body;
+
+	try {
+		const user = await userRepository.register({ name, email, password, phoneNumber, address });
+		res.status(HttpStatusCode.INSERT_OK).json({
+			message: "Register user successfully",
+			data: user,
+		});
+	} catch (exception) {
+		res.status(HttpStatusCode.INTERNAL_SEVER_ERROR).json({
+			message: exception.toString(),
+		});
+	}
 };
 const getDetailUser = async (req, res) => {};
 
