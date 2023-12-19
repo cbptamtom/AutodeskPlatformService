@@ -34,5 +34,6 @@ export default mongoose.model(
 			type: String,
 			require: true,
 		},
+		buckets: [{ type: ObjectId, ref: "Bucket" }],
 	})
 );

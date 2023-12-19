@@ -10,20 +10,22 @@ export default function checkToken(req, res, next) {
 		next();
 		return;
 	}
+	const token = req.headers?.authorization?.split(" ")[1];
 
 	try {
+		debugger;
+
 		let jwtObject = jwt.verify(token, process.env.JWT_SECRET);
-		const isExpired = Data.now() >= jwtObject.exp * 1000;
+		const isExpired = Date.now() >= jwtObject.exp * 1000;
 		if (isExpired) {
-			res.result(HttpStatusCode.BAD_REQUEST).json({ message: "Token is expired" });
+			return res.result(HttpStatusCode.BAD_REQUEST).json({ message: "Token is expired" });
+		} else {
+			next();
 		}
-		console.log(jwtObject);
 	} catch (exception) {
-		res.status(HttpStatusCode.BAD_REQUEST).json({ message: exception.message });
+		return res.status(HttpStatusCode.BAD_REQUEST).json({ message: exception.message });
 	}
 
 	// other requests
 	// get and validate token
-	const token = req.headers?.authorization?.split(" ")[1];
-	debugger;
 }
