@@ -56,6 +56,7 @@ router.post("", formidable(), async function (req, res, next) {
 		res.status(400).send('The required field ("model-file") is missing.');
 		return;
 	}
+
 	try {
 		const obj = await uploadObject(file.name, file.path);
 		await translateObject(urnify(obj.objectId), req.fields["model-zip-entrypoint"]);

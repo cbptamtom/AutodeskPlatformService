@@ -1,7 +1,7 @@
 import fs from "fs";
 import pkg from "forge-apis";
 const { AuthClientTwoLegged } = pkg;
-import { APS_CLIENT_ID, APS_CLIENT_SECRET } from "../config/forgeConfig.js";
+import { APS_CLIENT_ID, APS_CLIENT_SECRET, APS_BUCKET } from "../config/forgeConfig.js";
 
 let internalAuthClient = new AuthClientTwoLegged(
 	APS_CLIENT_ID,
@@ -27,14 +27,15 @@ export const getPublicToken = async () => {
 
 export const ensureBucketExists = async (bucketKey) => {
 	try {
-		await new APS.BucketsApi().getBucketDetails(bucketKey, null, await service.getInternalToken());
+		debugger;
+		await new pkg.BucketsApi().getBucketDetails(bucketKey, null, await getInternalToken());
 	} catch (err) {
 		if (err.response.status === 404) {
-			await new APS.BucketsApi().createBucket(
+			await new pkg.BucketsApi().createBucket(
 				{ bucketKey, policyKey: "persistent" },
 				{},
 				null,
-				await service.getInternalToken()
+				await getInternalToken()
 			);
 		} else {
 			throw err;
@@ -43,16 +44,16 @@ export const ensureBucketExists = async (bucketKey) => {
 };
 
 export const listObjects = async () => {
-	await service.ensureBucketExists(APS_BUCKET);
-	let resp = await new APS.ObjectsApi().getObjects(APS_BUCKET, { limit: 64 }, null, await service.getInternalToken());
+	await ensureBucketExists(APS_BUCKET);
+	let resp = await new pkg.ObjectsApi().getObjects(APS_BUCKET, { limit: 64 }, null, await getInternalToken());
 	let objects = resp.body.items;
 	while (resp.body.next) {
 		const startAt = new URL(resp.body.next).searchParams.get("startAt");
-		resp = await new APS.ObjectsApi().getObjects(
+		resp = await new pkg.ObjectsApi().getObjects(
 			APS_BUCKET,
 			{ limit: 64, startAt },
 			null,
-			await service.getInternalToken()
+			await getInternalToken()
 		);
 		objects = objects.concat(resp.body.items);
 	}
@@ -60,14 +61,14 @@ export const listObjects = async () => {
 };
 
 export const uploadObject = async (objectName, filePath) => {
-	await service.ensureBucketExists(APS_BUCKET);
+	await ensureBucketExists(APS_BUCKET);
 	const buffer = await fs.promises.readFile(filePath);
-	const results = await new APS.ObjectsApi().uploadResources(
+	const results = await new pkg.ObjectsApi().uploadResources(
 		APS_BUCKET,
 		[{ objectKey: objectName, data: buffer }],
 		{ useAcceleration: false, minutesExpiration: 15 },
 		null,
-		await service.getInternalToken()
+		await getInternalToken()
 	);
 	if (results[0].error) {
 		throw results[0].completed;
@@ -85,13 +86,13 @@ export const translateObject = async (urn, rootFilename) => {
 		job.input.compressedUrn = true;
 		job.input.rootFilename = rootFilename;
 	}
-	const resp = await new APS.DerivativesApi().translate(job, {}, null, await service.getInternalToken());
+	const resp = await new pkg.DerivativesApi().translate(job, {}, null, await getInternalToken());
 	return resp.body;
 };
 
 export const getManifest = async (urn) => {
 	try {
-		const resp = await new APS.DerivativesApi().getManifest(urn, {}, null, await service.getInternalToken());
+		const resp = await new pkg.DerivativesApi().getManifest(urn, {}, null, await getInternalToken());
 		return resp.body;
 	} catch (err) {
 		if (err.response.status === 404) {
